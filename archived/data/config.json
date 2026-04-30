@@ -1,0 +1,15 @@
+{
+  "config_file": "./data/config.json",
+  "dump_file": "./data/sample_request_data.json",
+  "output_file": "./data/output.json",
+  "ENTRY_POINT_URL": "https://shuttleonline.ktmb.com.my/Home/Shuttle",
+  "FROM_STATION": "JB Sentral",
+  "TO_STATION": "Woodlands CIQ",
+  "Departure Date": "2026-04-26",
+  "Departure Time From": "05:00:00",
+  "Departure Time To": "23:55:00",
+  "Number of Tickets": "1",
+  "Alert Email Sender": "TheGoldenHorde75@gmail.com",
+  "Alert Email Receiver": "saracen75@gmail.com",
+  "Notify": "true"
+}
