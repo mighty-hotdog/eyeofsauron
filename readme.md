@@ -40,8 +40,13 @@ Incomplete components:
 
 # How to run
 1. run 'python3 ticket_search_bot.py' in bash  
+2. modify the files in ./params/ to change search parameters; bot will pick up changes on next execution cycle  
 
 # TODOs
 1. orchestrator and user interface  
-2. email addresses are hardcoded -> what's a good fix?  
-3. refactor capture_request_ktmb.py  
+2. tests
+3. docker distributable
+4. vm distributable
+5. email addresses are hardcoded -> what's a good fix?  
+6. refactor capture_request_ktmb.py  
+7. implement another bot type eg: air tickets, hotels/AirBnBs
