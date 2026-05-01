@@ -762,7 +762,7 @@ async def main():
         #await main_loop()
         await asyncio.gather(main_loop(), payload_loop())
     except KeyboardInterrupt:
-        # for when KeyboardInterrupt is not equivalent to SIGINT or SIGTERM
+        # for when KeyboardInterrupt is not SIGINT or SIGTERM
         logger.info("KeyboardInterrupt received")
         await handle_shutdown()
     except Exception:
