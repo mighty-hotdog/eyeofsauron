@@ -45,7 +45,7 @@ class PayloadParams:
 #   PAYLOAD OBJECTS
 #   custom payload objects + declarations go here
 # ────────────────────────────────────────────────
-payload_params = PayloadParams(loop_interval=10)
+payload_params = PayloadParams(loop_interval=20)
 
 
 # ________________________________________________
@@ -100,7 +100,7 @@ class ProcessConfig:
     loop_interval: int
     log_level: Literal[0, 10, 20, 30, 40, 50]
     # default values, immutable
-    default_config: DefaultConfig = DefaultConfig(config_file=f"./config/{Path(__file__).stem}_config.toml", loop_interval=10, log_level=30)
+    default_config: DefaultConfig = DefaultConfig(config_file=f"./config/{Path(__file__).stem}_config.toml", loop_interval=10, log_level=20)
 
     def __init__(self):
         self.default()
@@ -184,6 +184,7 @@ def init_main():
 def setup_logging(lvl: Optional[Literal[0, 10, 20, 30, 40, 50]] = None):
     if lvl is None:
         lvl = main_config.log_level
+    logger.info(f"Setting log level to {lvl}")
     logging.basicConfig(
         level=lvl,
         format="[%(levelname)-7s │ %(asctime)s │ %(process)d | %(filename)s] %(message)s",
@@ -194,7 +195,6 @@ def setup_logging(lvl: Optional[Literal[0, 10, 20, 30, 40, 50]] = None):
             #logging.FileHandler(config.log_file),    # disable file logging for now
         ]
     )
-    logger.info(f"Log level set to {lvl}")
 
 def setup_signal_handlers():
     loop = asyncio.get_event_loop()
@@ -214,8 +214,8 @@ async def handle_reconfig(sig: Optional[signal.Signals] = None):
     if sig is not None:
         logger.info(f"Received {sig.name} — reconfiguring")
     # add reconfig code here
-    setup_logging()
     logger.info(f"Loop interval set to {main_config.loop_interval} seconds")
+    setup_logging()
 
 async def cleanup():
     # add cleanup code here
@@ -232,7 +232,7 @@ async def update_config() -> bool:
     if main_config.load():
         main_config.save()
         return True
-    return True
+    return False
 
 
 # ________________________________________________
