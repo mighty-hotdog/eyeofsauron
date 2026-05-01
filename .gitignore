@@ -1,7 +1,7 @@
-.venv/
-__pycache__/
-.pytest_cache/
-config/
-data/
-output/
-params/
+**/.venv/
+**/__pycache__/
+**/.pytest_cache/
+**/config/
+**/data/
+**/output/
+**/params/
