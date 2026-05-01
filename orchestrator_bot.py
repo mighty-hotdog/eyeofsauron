@@ -6,7 +6,7 @@ brief desc: orchestrator service for ticket search bots
 
 author:     mighty_hotdog
 created:    01May2026
-modified:   01May2026
+modified:   02May2026
 desc:       orchestrator process for controlling/managing subprocesses that perform ticket searches on the KTMB website.
             reference template on which to add more complex/custom control logic as well as biz logic.
 """
@@ -181,9 +181,9 @@ class BotLibrary:
     async def add(self, bot_list: List[BotType]) -> int:
         num = 0
         for bot in bot_list:
-            if bot is not None:
+            if bot.name not in self.bot_types and bot is not None:
                 num += 1
-                setattr(self.bot_types, bot.name, bot)
+                self.bot_types[bot.name] = bot
         return num      # return # of bot types added
 
     async def remove(self, bot_list: Optional[list[str]] = None) -> int:
@@ -212,9 +212,56 @@ class BotLibrary:
 # ________________________________________________
 #   BOT POOL CLASSES
 # ────────────────────────────────────────────────
+@dataclass
+class BotState:
+    paused: bool = False
+    mode: Literal["working", "reconfiguring", "idling"] = "working"
+
+@dataclass
+class BotInstance:
+    id: int
+    type_: BotType
+    params: Config
+    state: BotState
+
 class BotPool:
-    async def profile(self):
-        pass
+    bots: Dict[int, BotInstance] = {}
+
+    def size(self) -> int:
+        return len(self.bots)
+
+    async def profile(self) -> Optional[dict[str, int]]:
+        return None
+
+    async def add(self, bot_list: List[BotInstance]) -> int:
+        num = 0
+        for bot in bot_list:
+            if bot.id not in self.bots and bot is not None:
+                num += 1
+                self.bots[bot.id] = bot
+        return num      # return # of bot instances added
+
+    async def remove(self, bot_list: Optional[list[int]] = None) -> int:
+        num = 0
+        if bot_list is None:
+            # remove all bot instances
+            num = self.size()
+            self.clear()
+        else:
+            # remove bot instances in list
+            for id in bot_list:
+                if self.bots.pop(id, None) is not None:
+                    num += 1
+        return num      # return # of bot instances removed
+
+    def get(self, id: int) -> Optional[BotInstance]:
+        return self.bots.get(id)
+
+    def bot_list(self) -> List[int]:
+        return list(self.bots.keys())
+
+    def clear(self):
+        self.bots.clear()
 
 
 # ________________________________________________
@@ -454,6 +501,8 @@ async def handle_shutdown(sig: Optional[signal.Signals] = None):
     # add shutdown code here
     main_state.running = False      # stop main loop
     payload_state.running = False   # stop payload loop
+    orchestrator.state.request_to_job_loop_running = False  # stop request to job loop
+    orchestrator.state.job_manager_loop_running = False     # stop job manager loop
 
 async def handle_reconfig(sig: Optional[signal.Signals] = None):
     if sig is not None:
@@ -535,8 +584,10 @@ async def main():
         logger.exception("Unexpected top-level exception")
         sys.exit(70)
     finally:
-        logger.info(f"Main process {__name__} stopped")
+        logger.info("Main process stopped | uptime = %s | loops = %s", datetime.now() - main_state.start_time, main_state.loop_count)
+        logger.info("Payload loops stopped | uptime = %s | loops = %s", datetime.now() - payload_state.start_time, payload_state.loop_count)
         await cleanup()
+        sys.exit(0)
 
 if __name__ == "__main__":
     try:
