@@ -6,21 +6,21 @@ Sends email to pre-specified alert receiver on tickets found.
 
 # Dev Goals
 To learn python:  
-1. basics - types, functions, modules, str, list, dict, array, def, class, dataclass, etc  
-2. processes, subroutines, async, orchestration  
-3. datetime  
-4. smtp + programmatic emailing  
-5. directory and file io  
-6. headless website browsing/interaction with PlayWright  
+1. basics - types, functions, modules, str, list, dict, array, def, class, dataclass, objects, datetime, etc  
+2. processes, tasks, coroutines, signals, orchestration via subprocess, asyncio, signal, sys, os  
+3. working with files, directories, safe read/write via pathlib, tempfile, shutil, tomllib, tomli_w, json, orjson  
+4. secrets and keystore via keyring  
+5. smtp + programmatic emailing  
+6. headless web browsing/interaction with PlayWright, BeautifulSoup  
 
 # Status
 Continues forever.  
 
-Completed/runnable components:  
+## Completed/runnable components
 1. ticket_search_bot.py  
 2. capture_request_ktmb.py  
 
-Incomplete components:  
+## Incomplete components
 1. orchestrator_bot.py - manages bot swarm that simultaneously executes multiple ticket search requests  
 2. user interface  
 
@@ -44,9 +44,7 @@ Incomplete components:
 
 # TODOs
 1. orchestrator and user interface  
-2. tests
-3. docker distributable
-4. vm distributable
-5. email addresses are hardcoded -> what's a good fix?  
-6. refactor capture_request_ktmb.py  
-7. implement another bot type eg: air tickets, hotels/AirBnBs
+2. tests  
+3. docker + vm distributable  
+4. refactor capture_request_ktmb.py  
+5. implement another bot type eg: air tickets, hotels/AirBnBs  

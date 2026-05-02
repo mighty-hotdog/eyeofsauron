@@ -46,35 +46,209 @@ class PayloadParams:
 @dataclass(frozen=True)
 class Request:
     type_: str
-    params: dict[str, str]
+    params: dict[str, Any]
+
+    def __post_init__(self):
+        # this method runs immediately after object initialization
+        # use this method to perform validation checks on object attributes
+        if not isinstance(self.type_, str):
+            raise ValueError("Request type_ must be a string")
+        if not self.type_:
+            raise ValueError("Request type_ cannot be an empty string")
+        if self.type_.isspace():
+            raise ValueError("Request type_ cannot contain only whitespace")
+        if self.type_.strip() != self.type_:
+            raise ValueError("Request type_ cannot contain leading or trailing whitespace")
+        if self.params:
+            for key in self.params.items():
+                if not isinstance(key, str):
+                    raise ValueError("Request params key must be a string")
+                if not key:
+                    raise ValueError("Request params key cannot be an empty string")
+                if key.isspace():
+                    raise ValueError("Request params key cannot contain only whitespace")
+                if key.strip() != key:
+                    raise ValueError("Request params key cannot contain leading or trailing whitespace")
 
 class RequestQueue:
     requests: List[Request] = []
     paused: bool = False
 
+    """
+    # removing all getters and setters
+    # method call is 30 - 50% more expensive than direct attribute access
+    # keeping these as comments to show intended interface as originally designed
     def isPaused(self) -> bool:
         return self.paused
 
     def pause(self):
         self.paused = True
 
+    def unpause(self):
+        self.paused = False
+
     def size(self) -> int:
+        # method returns number of requests in the queue
         return len(self.requests)
 
-    def insert(self, req: Request, index: Optional[int] = None) -> int:
-        return len(self.requests)   # returns index of inserted request
-
-    def get(self, index: Optional[int] = None) -> Optional[Request]:
-        return None
-
     def peek(self, index: Optional[int] = None) -> Optional[Request]:
+        # method returns request object without removing it from the queue
         return None
-
-    async def profile(self) -> Optional[dict[str, int]]:
-        return None
-
+    
     def clear(self):
         self.requests.clear()
+    """
+
+    async def refresh(self):
+        # continuously looping method that refreshes queue by loading requests from external source
+        pass
+
+    async def insert(self, req_list: List[Request], index: Optional[int] = None) -> int:
+        # method inserts requests into queue and returns number of inserted requests
+
+        # validate inputs
+        if not isinstance(req_list, list) or not all(isinstance(req, Request) for req in req_list):
+            # Note that "all(isinstance(req, Request) for req in req_list" returns True even for req_list = []
+            raise ValueError("req_list must be a list of Request objects only")
+        if index is not None and not isinstance(index, int):
+            raise ValueError("index must be an integer")
+        
+        # processing insert
+        # input is empty list: return 0 immediately
+        if len(req_list) < 1:
+            return 0
+        
+        # index is None: extend and return
+        elif index is None:
+            self.requests.extend(req_list)
+            return len(req_list)
+        
+        # index is int but beyond end of list: extend and return
+        elif index >= len(self.requests):
+            self.requests.extend(req_list)
+            return len(req_list)
+
+        # index is int and within bounds: insert and return
+        #elif index < len(self.requests):
+        else:
+            self.requests[index:index] = req_list   # slice assignment. more efficient than concatenation
+            #self.requests = self.requests[:index] + req_list + self.requests[index:]   # concatenation
+            return len(req_list)
+
+    async def remove(self, startindex: Optional[int] = None, endindex: Optional[int] = None) -> int:
+        # method removes requests from queue from startindex to endindex inclusive, and returns number of removed requests
+
+        # validate inputs
+        if startindex is not None:
+            if not isinstance(startindex, int):
+                raise ValueError("startindex must be an integer")
+            if startindex < 0:
+                raise ValueError("startindex must be greater than or equal to 0")
+        if endindex is not None:
+            if not isinstance(endindex, int):
+                raise ValueError("endindex must be an integer")
+            if endindex < 0:
+                raise ValueError("endindex must be greater than or equal to 0")
+        if endindex is not None and startindex is not None and endindex < startindex:
+            raise ValueError("endindex must be greater than or equal to startindex")
+        
+        # processing remove
+        # self.requests is empty list: return 0 immediately
+        if len(self.requests) < 1:
+            return 0
+        
+        elif startindex is None:
+            # startindex and endindex both None: remove all requests and return
+            if endindex is None:
+                num = len(self.requests)
+                self.requests.clear()
+                return num
+            
+            # startindex is none and endindex is not None but within bounds: remove from 0 to endindex inclusive and return
+            elif endindex < len(self.requests):
+                num = endindex + 1
+                self.requests = self.requests[endindex + 1:]    # slicing. keeps elements from endindex + 1 to last
+                return num
+            
+            # startindex is none and endindex is not None but beyond end of list: remove all requests and return
+            else:
+                num = len(self.requests)
+                self.requests.clear()
+                return num
+            
+        elif endindex is None:
+            # endindex is None and startindex is not None but within bounds: remove from startindex to last inclusive and return
+            if startindex < len(self.requests):
+                num = len(self.requests) - startindex + 1
+                self.requests = self.requests[:startindex]      # slicing. keeps elements from 0 to startindex - 1
+                return num
+            
+            # endindex is None and startindex is not None but beyond end of list: remove all requests and return
+            else:
+                num = len(self.requests)
+                self.requests.clear()
+                return num
+        
+        else:
+            # startindex and endindex are not None and startindex is beyond end of list: return 0
+            if startindex >= len(self.requests):
+                return 0
+            
+            # startindex and endindex are not None and
+            #   startindex is within bounds and endindex is beyond end of list:
+            #   remove from startindex to last inclusive and return
+            elif endindex >= len(self.requests):
+                num = len(self.requests) - startindex + 1
+                self.requests = self.requests[:startindex]      # slicing. keeps elements from 0 to startindex - 1
+                return num
+            
+            # startindex and endindex are not None and
+            #   startindex and endindex are both within bounds:
+            #   remove from startindex to endindex inclusive and return
+            #elif startindex < len(self.requests) and endindex < len(self.requests):
+            else:
+                num = endindex - startindex + 1
+                del self.requests[startindex:endindex + 1]      # deletes elements from startindex to endindex inclusive
+                                                                # more efficient than slice andconcatenation
+                #self.requests = self.requests[:startindex] + self.requests[endindex + 1:]   # slice and concatenate
+                return num
+
+    def get(self, index: Optional[int] = None) -> Optional[Request]:
+        # method removes request from the queue and returns the request object
+
+        # validate inputs
+        if index is not None:
+            if not isinstance(index, int):
+                raise ValueError("index must be an integer")
+            elif index >= len(self.requests):
+                raise ValueError("index must be less than the number of requests in the queue")
+            elif index < 0:
+                raise ValueError("index must be greater than or equal to 0")
+
+        # processing get
+        # no requests in queue: return None
+        if len(self.requests) < 1:
+            return None
+        
+        # index is None: pop 1st element and return
+        elif index is None:
+            return self.requests.pop(0)
+        
+        # index is int and within bounds: pop element at index and return
+        else:
+            return self.requests.pop(index)
+
+    async def profile(self) -> dict[str, int]:
+        # method scans queue and returns a dictionary of request types and their counts
+        
+        # scan queue
+        prof: dict[str, int] = {}
+        for req in self.requests:
+            if req.type_ in prof:
+                prof[req.type_] += 1
+            else:
+                prof[req.type_] = 1
+        return prof
 
 
 # ________________________________________________
