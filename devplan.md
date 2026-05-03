@@ -7,10 +7,10 @@
 5. implement another bot type eg: air tickets, hotels/AirBnBs  
 
 ## Schedule
-03 - 08 May: bots, bots pool, bots manager  
+03 - 08 May: generic bot, bot pool, bot manager  
     03 May:  
-    a.  generic bot + bots pool + jobs manager design criteria  
-    b.  generic bot + bots pool + jobs manager design  
+    a.  generic bot + bot pool + bot manager design criteria  
+    b.  generic bot + bot pool + bot manager design  
     04 May:  
     c.  generic bot start, run, shutdown from bash  
     d.  generic bot public API + internals  
@@ -18,18 +18,18 @@
     f.  mock orchestrator start, run, shutdown from bash  
     g.  generic bot public API test: start, shutdown, query, command, health-check from mock orchestrator  
     05 May:  
-    h.  bots pool start, run, shutdown from bash  
-    i.  bots pool public API  
-    j.  bots pool internals  
-    k.  bots pool public API test: start, shutdown, query, command, health-check from mock orchestrator  
+    h.  bot pool start, run, shutdown from bash  
+    i.  bot pool public API  
+    j.  bot pool internals  
+    k.  bot pool public API test: start, shutdown, query, command, health-check from mock orchestrator  
     06 May:  
-    l.  bots pool - generic bots integration test: with mock orchestrator  
+    l.  bot pool - generic bot integration test: with mock orchestrator  
     07 May:  
-    m.  jobs_manager loop logic  
-    n.  bots pool - generic bots - jobs manager integration test: with mock orchestrator  
+    m.  bot manager logic  
+    n.  bot pool - generic bot - bot manager integration test: with mock orchestrator  
     08 May:  
     o.  orchestrator implementation + test  
-    p.  bots pool - generic bots - jobs manager integration test: with orchestrator  
+    p.  bot pool - generic bot - bot manager integration test: with orchestrator  
 09 - 11 May: requests queue  
     a.  requests queue start, run, shutdown from bash  
     b.  requests queue public API  
